@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Security Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div id="header">
+        <h1>Travel Security Dashboard</h1>
+        <nav>
+            <a href="/" class="active">Globe</a>
+            <a href="/form">Add Traveler</a>
+            <a href="/roster">Roster</a>
+        </nav>
+    </div>
+    <div id="main">
+        <div id="globe-container"></div>
+        <div id="panel" class="hidden">
+            <div id="panel-header">
+                <h2 id="panel-country"></h2>
+                <button id="panel-close" onclick="closePanel()">✕</button>
+            </div>
+            <div id="panel-stats">
+                <span id="panel-current"></span>
+                <span id="panel-planned"></span>
+            </div>
+            <div id="panel-travelers"></div>
+        </div>
+    </div>
+    <div id="tooltip" class="hidden"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+    <script src="{{ url_for('static', filename='js/globe.js') }}"></script>
+</body>
+</html>

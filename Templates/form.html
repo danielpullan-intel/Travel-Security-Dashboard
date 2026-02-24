@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Traveler — Travel Security</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/form.css') }}">
+</head>
+<body>
+    <div id="header">
+        <h1>Travel Security Dashboard</h1>
+        <nav>
+            <a href="/">Globe</a>
+            <a href="/form" class="active">Add Traveler</a>
+            <a href="/roster">Roster</a>
+        </nav>
+    </div>
+
+    <div id="form-page">
+        <div id="form-container">
+            <h2 id="form-title">New Traveler Entry</h2>
+
+            <div class="form-section">
+                <h3>Traveler Information</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" id="first_name" placeholder="First name">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" id="last_name" placeholder="Last name">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Passport Number</label>
+                        <input type="text" id="passport_number" placeholder="e.g. A12345678">
+                    </div>
+                    <div class="form-group">
+                        <label>Destination Country</label>
+                        <input type="text" id="country" placeholder="e.g. Germany">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Travel Start Date</label>
+                        <input type="date" id="travel_start">
+                    </div>
+                    <div class="form-group">
+                        <label>Travel End Date</label>
+                        <input type="date" id="travel_end">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Travel Approved</label>
+                        <select id="travel_approved">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Itinerary Link (optional)</label>
+                        <input type="text" id="itinerary_link" placeholder="https://...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Primary Contact</h3>
+                <p class="section-note">Traveler's preferred means of contact while in country</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Contact Type</label>
+                        <input type="text" id="primary_contact_label" placeholder="e.g. Mobile, WhatsApp">
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Value</label>
+                        <input type="text" id="primary_contact_value" placeholder="e.g. +1-202-555-0100">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>In-Country Contact</h3>
+                <p class="section-note">Someone in country who knows the traveler is there</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="secondary_contact_name" placeholder="Full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" id="secondary_contact_phone" placeholder="Phone number">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Relationship</label>
+                        <input type="text" id="secondary_contact_relationship" placeholder="e.g. Local Associate, Hotel Contact">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Emergency Contact</h3>
+                <p class="section-note">Spouse, parent, or next of kin at home</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="emergency_contact_name" placeholder="Full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" id="emergency_contact_phone" placeholder="Phone number">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Relationship</label>
+                        <input type="text" id="emergency_contact_relationship" placeholder="e.g. Spouse, Father">
+                    </div>
+                </div>
+            </div>
+
+            <div id="form-actions">
+                <button id="submit-btn" onclick="submitForm()">Add Traveler</button>
+                <div id="form-message"></div>
+            </div>
+            <div style="height: 60px;"></div>
+        </div>
+    </div>
+
+    <script>
+    let editId = null;
+
+    // Check if we're in edit mode by looking at the URL
+    const pathParts = window.location.pathname.split("/");
+    if (pathParts[1] === "form" && pathParts[2]) {
+        editId = parseInt(pathParts[2]);
+        document.getElementById("form-title").textContent = "Edit Traveler";
+        document.getElementById("submit-btn").textContent = "Save Changes";
+        loadTraveler(editId);
+    }
+
+    function loadTraveler(id) {
+        fetch(`/api/travelers/get/${id}`)
+            .then(r => r.json())
+            .then(t => {
+                document.getElementById("first_name").value = t.first_name;
+                document.getElementById("last_name").value = t.last_name;
+                document.getElementById("passport_number").value = t.passport_number;
+                document.getElementById("country").value = t.country;
+                document.getElementById("travel_start").value = t.travel_start;
+                document.getElementById("travel_end").value = t.travel_end;
+                document.getElementById("travel_approved").value = t.travel_approved ? "true" : "false";
+                document.getElementById("itinerary_link").value = t.itinerary_link || "";
+                document.getElementById("primary_contact_label").value = t.contacts.primary.label;
+                document.getElementById("primary_contact_value").value = t.contacts.primary.value;
+                document.getElementById("secondary_contact_name").value = t.contacts.secondary.name;
+                document.getElementById("secondary_contact_phone").value = t.contacts.secondary.phone;
+                document.getElementById("secondary_contact_relationship").value = t.contacts.secondary.relationship;
+                document.getElementById("emergency_contact_name").value = t.contacts.emergency.name;
+                document.getElementById("emergency_contact_phone").value = t.contacts.emergency.phone;
+                document.getElementById("emergency_contact_relationship").value = t.contacts.emergency.relationship;
+            });
+    }
+
+    function submitForm() {
+        const fields = ["first_name","last_name","passport_number","country","travel_start","travel_end",
+            "primary_contact_label","primary_contact_value",
+            "secondary_contact_name","secondary_contact_phone","secondary_contact_relationship",
+            "emergency_contact_name","emergency_contact_phone","emergency_contact_relationship"];
+
+        for (const field of fields) {
+            if (!document.getElementById(field).value.trim()) {
+                showMessage("Please fill in all required fields.", "error");
+                return;
+            }
+        }
+
+        const data = {
+            first_name: document.getElementById("first_name").value.trim(),
+            last_name: document.getElementById("last_name").value.trim(),
+            passport_number: document.getElementById("passport_number").value.trim(),
+            country: document.getElementById("country").value.trim(),
+            travel_start: document.getElementById("travel_start").value,
+            travel_end: document.getElementById("travel_end").value,
+            travel_approved: document.getElementById("travel_approved").value === "true",
+            itinerary_link: document.getElementById("itinerary_link").value.trim(),
+            primary_contact_label: document.getElementById("primary_contact_label").value.trim(),
+            primary_contact_value: document.getElementById("primary_contact_value").value.trim(),
+            secondary_contact_name: document.getElementById("secondary_contact_name").value.trim(),
+            secondary_contact_phone: document.getElementById("secondary_contact_phone").value.trim(),
+            secondary_contact_relationship: document.getElementById("secondary_contact_relationship").value.trim(),
+            emergency_contact_name: document.getElementById("emergency_contact_name").value.trim(),
+            emergency_contact_phone: document.getElementById("emergency_contact_phone").value.trim(),
+            emergency_contact_relationship: document.getElementById("emergency_contact_relationship").value.trim()
+        };
+
+        const url = editId ? `/api/travelers/edit/${editId}` : "/api/travelers/add";
+
+        fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+        .then(r => r.json())
+        .then(result => {
+            if (result.success) {
+                showMessage(editId ? "Traveler updated successfully." : "Traveler added successfully.", "success");
+                if (!editId) clearForm();
+            } else {
+                showMessage("Something went wrong.", "error");
+            }
+        })
+        .catch(() => showMessage("Something went wrong.", "error"));
+    }
+
+    function showMessage(msg, type) {
+        const el = document.getElementById("form-message");
+        el.textContent = msg;
+        el.className = type;
+    }
+
+    function clearForm() {
+        const inputs = document.querySelectorAll("#form-container input, #form-container select");
+        inputs.forEach(i => i.value = "");
+        document.getElementById("travel_approved").value = "true";
+    }
+    </script>
+</body>
+</html>

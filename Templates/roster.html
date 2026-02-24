@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roster — Travel Security</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/roster.css') }}">
+</head>
+<body>
+    <div id="header">
+        <h1>Travel Security Dashboard</h1>
+        <nav>
+            <a href="/">Globe</a>
+            <a href="/form">Add Traveler</a>
+            <a href="/roster" class="active">Roster</a>
+        </nav>
+    </div>
+    <div id="roster-page">
+        <div id="tab-bar">
+            <button class="tab active" onclick="switchTab('pending', this)">Awaiting Approval</button>
+            <button class="tab" onclick="switchTab('active', this)">Travel Roster</button>
+            <button class="tab" onclick="switchTab('historic', this)">Historic</button>
+        </div>
+        <div id="roster-controls">
+            <input type="text" id="search" placeholder="Search by name or country..." oninput="filterTable()">
+            <select id="status-filter" onchange="filterTable()" style="display:none">
+                <option value="all">All</option>
+                <option value="current">In Country</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="denied">Travel Denied</option>
+            </select>
+        </div>
+        <div id="table-wrap">
+            <table id="roster-table">
+                <thead id="roster-thead"></thead>
+                <tbody id="roster-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+    const today = new Date().toISOString().split("T")[0];
+    let allTravelers = [];
+    let currentTab = "pending";
+    let sortKey = "travel_start";
+    let sortAsc = true;
+
+    function getStatus(t) {
+        if (!t.travel_approved) return "denied";
+        if (t.travel_start <= today && t.travel_end >= today) return "current";
+        if (t.travel_start > today) return "upcoming";
+        return "returned";
+    }
+
+    function statusBadge(s) {
+        if (s === "current") return '<span class="badge current">● In Country</span>';
+        if (s === "upcoming") return '<span class="badge upcoming">● Upcoming</span>';
+        if (s === "denied") return '<span class="badge denied">● Travel Denied</span>';
+        return '<span class="badge returned">● Returned</span>';
+    }
+
+    function switchTab(tab, el) {
+        currentTab = tab;
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        el.classList.add("active");
+        const statusFilter = document.getElementById("status-filter");
+        statusFilter.style.display = tab === "pending" ? "none" : "";
+        loadTab(tab);
+    }
+
+    function loadTab(tab) {
+        const endpoints = {
+            pending: "/api/travelers/pending",
+            active: "/api/travelers/all",
+            historic: "/api/travelers/historic"
+        };
+        fetch(endpoints[tab])
+            .then(r => r.json())
+            .then(data => {
+                allTravelers = data;
+                renderHeaders(tab);
+                filterTable();
+            });
+    }
+
+    function renderHeaders(tab) {
+        const thead = document.getElementById("roster-thead");
+        if (tab === "pending") {
+            thead.innerHTML = `<tr>
+                <th onclick="sortTable('last_name')">Name ↕</th>
+                <th onclick="sortTable('country')">Country ↕</th>
+                <th onclick="sortTable('travel_start')">Start ↕</th>
+                <th onclick="sortTable('travel_end')">End ↕</th>
+                <th>Passport</th>
+                <th>Primary Contact</th>
+                <th>In-Country Contact</th>
+                <th>Emergency Contact</th>
+                <th>Actions</th>
+            </tr>`;
+        } else {
+            thead.innerHTML = `<tr>
+                <th onclick="sortTable('last_name')">Name ↕</th>
+                <th onclick="sortTable('country')">Country ↕</th>
+                <th onclick="sortTable('travel_start')">Start ↕</th>
+                <th onclick="sortTable('travel_end')">End ↕</th>
+                <th>Status</th>
+                <th>Passport</th>
+                <th>Primary Contact</th>
+                <th>In-Country Contact</th>
+                <th>Emergency Contact</th>
+                <th>Itinerary</th>
+                <th>Actions</th>
+            </tr>`;
+        }
+    }
+
+    function filterTable() {
+        const search = document.getElementById("search").value.toLowerCase();
+        const statusFilter = document.getElementById("status-filter").value;
+        let filtered = allTravelers.filter(t => {
+            const matchSearch = `${t.first_name} ${t.last_name} ${t.country}`.toLowerCase().includes(search);
+            const matchStatus = currentTab === "pending" || statusFilter === "all" || getStatus(t) === statusFilter;
+            return matchSearch && matchStatus;
+        });
+        filtered = sortData(filtered);
+        renderTable(filtered);
+    }
+
+    function sortTable(key) {
+        if (sortKey === key) sortAsc = !sortAsc;
+        else { sortKey = key; sortAsc = true; }
+        filterTable();
+    }
+
+    function sortData(data) {
+        return [...data].sort((a, b) => {
+            const av = a[sortKey] || "";
+            const bv = b[sortKey] || "";
+            return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+        });
+    }
+
+    function renderTable(travelers) {
+        const tbody = document.getElementById("roster-body");
+        if (travelers.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#7eb8f7;padding:20px">No travelers found.</td></tr>`;
+            return;
+        }
+        if (currentTab === "pending") {
+            tbody.innerHTML = travelers.map(t => `
+                <tr>
+                    <td>${t.last_name}, ${t.first_name}</td>
+                    <td>${t.country}</td>
+                    <td>${t.travel_start}</td>
+                    <td>${t.travel_end}</td>
+                    <td>${t.passport_number}</td>
+                    <td>${t.contacts.primary.label}: ${t.contacts.primary.value}</td>
+                    <td>${t.contacts.secondary.name} (${t.contacts.secondary.relationship})<br>${t.contacts.secondary.phone}</td>
+                    <td>${t.contacts.emergency.name} (${t.contacts.emergency.relationship})<br>${t.contacts.emergency.phone}</td>
+                    <td class="action-btns">
+                        <button class="btn-approve" onclick="approve(${t.id})">Approve</button>
+                        <button class="btn-deny" onclick="deny(${t.id})">Deny</button>
+                        <button class="btn-edit" onclick="edit(${t.id})">Edit</button>
+                        <button class="btn-delete" onclick="del(${t.id})">Delete</button>
+                    </td>
+                </tr>`).join("");
+        } else {
+            tbody.innerHTML = travelers.map(t => {
+                const status = getStatus(t);
+                return `<tr class="row-${status}">
+                    <td>${t.last_name}, ${t.first_name}</td>
+                    <td>${t.country}</td>
+                    <td>${t.travel_start}</td>
+                    <td>${t.travel_end}</td>
+                    <td>${statusBadge(status)}</td>
+                    <td>${t.passport_number}</td>
+                    <td>${t.contacts.primary.label}: ${t.contacts.primary.value}</td>
+                    <td>${t.contacts.secondary.name} (${t.contacts.secondary.relationship})<br>${t.contacts.secondary.phone}</td>
+                    <td>${t.contacts.emergency.name} (${t.contacts.emergency.relationship})<br>${t.contacts.emergency.phone}</td>
+                    <td>${t.itinerary_link ? `<a href="${t.itinerary_link}" target="_blank">View →</a>` : "—"}</td>
+                    ${currentTab === 'active' ? `<td class="action-btns">
+                        <button class="btn-edit" onclick="edit(${t.id})">Edit</button>
+                        <button class="btn-delete" onclick="del(${t.id})">Delete</button>
+                    </td>` : '<td></td>'}
+                </tr>`;
+            }).join("");
+        }
+    }
+
+    function approve(id) {
+        if (!confirm("Approve this traveler?")) return;
+        fetch(`/api/travelers/approve/${id}`, { method: "POST" })
+            .then(() => loadTab("pending"));
+    }
+
+    function deny(id) {
+        if (!confirm("Deny this traveler?")) return;
+        fetch(`/api/travelers/deny/${id}`, { method: "POST" })
+            .then(() => loadTab("pending"));
+    }
+
+    function edit(id) {
+        window.location.href = `/form/${id}`;
+    }
+
+    function del(id) {
+        if (!confirm("Delete this traveler permanently?")) return;
+        fetch(`/api/travelers/delete/${id}`, { method: "POST" })
+            .then(() => loadTab(currentTab));
+    }
+
+    loadTab("pending");
+    renderHeaders("pending");
+    </script>
+</body>
+</html>

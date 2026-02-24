@@ -1,0 +1,37 @@
+#roster-page { display: flex; flex-direction: column; padding: 24px 32px; flex: 1; overflow: hidden; }
+#roster-controls { display: flex; gap: 16px; margin-bottom: 16px; }
+#roster-controls input { background: #0d1526; border: 1px solid #1e3a5f; border-radius: 4px; color: #e0e6f0; padding: 8px 12px; font-size: 0.88rem; outline: none; width: 280px; }
+#roster-controls input:focus { border-color: #7eb8f7; }
+#roster-controls select { background: #0d1526; border: 1px solid #1e3a5f; border-radius: 4px; color: #e0e6f0; padding: 8px 12px; font-size: 0.88rem; outline: none; }
+#table-wrap { overflow: auto; flex: 1; border: 1px solid #1e3a5f; border-radius: 8px; }
+#roster-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+#roster-table thead { position: sticky; top: 0; background: #0d1526; z-index: 10; }
+#roster-table th { padding: 12px 14px; text-align: left; color: #7eb8f7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.75rem; border-bottom: 1px solid #1e3a5f; cursor: pointer; white-space: nowrap; }
+#roster-table th:hover { color: #aed8ff; }
+#roster-table td { padding: 10px 14px; border-bottom: 1px solid #111e35; color: #c0d0e8; vertical-align: top; line-height: 1.5; }
+#roster-table tr:last-child td { border-bottom: none; }
+#roster-table tr.row-current { background: #0d1e10; }
+#roster-table tr.row-upcoming { background: #1a1500; }
+#roster-table tr.row-denied { background: #1a0a0a; }
+#roster-table tr.row-returned { background: transparent; }
+#roster-table tr:hover td { filter: brightness(1.2); }
+#roster-table a { color: #7eb8f7; text-decoration: none; }
+#roster-table a:hover { text-decoration: underline; }
+.badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; white-space: nowrap; font-weight: 600; }
+.badge.current { color: #4adf7a; background: #1a4a2a; }
+.badge.upcoming { color: #f0c040; background: #3a2a00; }
+.badge.denied { color: #ff6b6b; background: #4a1a1a; }
+.badge.returned { color: #a0b0c8; background: #1a2a4a; }
+#tab-bar { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid #1e3a5f; padding-bottom: 0; }
+.tab { background: none; border: none; color: #7eb8f7; padding: 10px 20px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; opacity: 0.5; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tab:hover { opacity: 0.8; }
+.tab.active { opacity: 1; border-bottom: 2px solid #7eb8f7; }
+.action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn-approve { background: #1a4a2a; color: #4adf7a; border: none; border-radius: 4px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; }
+.btn-deny { background: #4a1a1a; color: #ff6b6b; border: none; border-radius: 4px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; }
+.btn-edit { background: #1a2a4a; color: #7eb8f7; border: none; border-radius: 4px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; }
+.btn-delete { background: #2a1a00; color: #f0a500; border: none; border-radius: 4px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; }
+.btn-approve:hover { filter: brightness(1.3); }
+.btn-deny:hover { filter: brightness(1.3); }
+.btn-edit:hover { filter: brightness(1.3); }
+.btn-delete:hover { filter: brightness(1.3); }

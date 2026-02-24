@@ -1,0 +1,18 @@
+#form-page { display: flex; justify-content: center; padding: 40px 20px 80px 20px; overflow-y: auto; flex: 1; }
+#form-container { width: 100%; max-width: 760px; padding-bottom: 80px; }
+#form-container h2 { font-size: 1.2rem; font-weight: 400; color: #7eb8f7; letter-spacing: 1px; margin-bottom: 24px; text-transform: uppercase; }
+.form-section { background: #0d1526; border: 1px solid #1e3a5f; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+.form-section h3 { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: #7eb8f7; margin-bottom: 6px; font-weight: 500; }
+.section-note { font-size: 0.78rem; color: #6a8aaa; margin-bottom: 16px; }
+.form-row { display: flex; gap: 16px; margin-bottom: 14px; }
+.form-group { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 0.78rem; color: #a0b0c8; text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group input, .form-group select { background: #1a2a4a; border: 1px solid #2a4a7f; border-radius: 4px; color: #e0e6f0; padding: 8px 10px; font-size: 0.88rem; outline: none; }
+.form-group input:focus, .form-group select:focus { border-color: #7eb8f7; }
+.form-group select option { background: #1a2a4a; }
+#form-actions { display: flex; align-items: center; gap: 20px; margin-top: 10px; margin-bottom: 48px; }
+#submit-btn { background: #1a5aaa; color: #e0e6f0; border: none; border-radius: 6px; padding: 12px 32px; font-size: 0.9rem; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; }
+#submit-btn:hover { background: #2a7adf; }
+#form-message { font-size: 0.85rem; }
+#form-message.success { color: #4adf7a; }
+#form-message.error { color: #df4a4a; }
