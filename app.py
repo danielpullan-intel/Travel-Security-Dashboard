@@ -4,6 +4,59 @@ from datetime import date
 
 app = Flask(__name__)
 
+def init_db():
+    import json
+    conn = sqlite3.connect("travel_security.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS travelers (
+            id INTEGER PRIMARY KEY,
+            country TEXT,
+            first_name TEXT,
+            last_name TEXT,
+            travel_start TEXT,
+            travel_end TEXT,
+            passport_number TEXT,
+            travel_approved INTEGER,
+            itinerary_link TEXT,
+            primary_contact_label TEXT,
+            primary_contact_value TEXT,
+            secondary_contact_name TEXT,
+            secondary_contact_phone TEXT,
+            secondary_contact_relationship TEXT,
+            emergency_contact_name TEXT,
+            emergency_contact_phone TEXT,
+            emergency_contact_relationship TEXT,
+            status TEXT DEFAULT 'active'
+        )
+    """)
+    cursor.execute("SELECT COUNT(*) FROM travelers")
+    if cursor.fetchone()[0] == 0:
+        with open("data/travelers.json") as f:
+            travelers = json.load(f)
+        today = date.today().isoformat()
+        for t in travelers:
+            if t["dates_of_travel"]["end"] < today:
+                status = "historic"
+            elif t["dates_of_travel"]["start"] > today:
+                status = "pending"
+            else:
+                status = "active"
+            cursor.execute("INSERT OR IGNORE INTO travelers VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
+                t["id"], t["country"], t["traveler"]["first"], t["traveler"]["last"],
+                t["dates_of_travel"]["start"], t["dates_of_travel"]["end"],
+                t["passport_number"], 1 if t["travel_approved"] else 0,
+                t["itinerary_link"],
+                t["contacts"]["primary"]["label"], t["contacts"]["primary"]["value"],
+                t["contacts"]["secondary"]["name"], t["contacts"]["secondary"]["phone"], t["contacts"]["secondary"]["relationship"],
+                t["contacts"]["emergency"]["name"], t["contacts"]["emergency"]["phone"], t["contacts"]["emergency"]["relationship"],
+                status
+            ))
+        conn.commit()
+    conn.close()
+
+init_db()
+
 def get_db():
     conn = sqlite3.connect("travel_security.db")
     conn.row_factory = sqlite3.Row
